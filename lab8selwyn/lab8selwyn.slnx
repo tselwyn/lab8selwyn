@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="lab8selwyn/lab8selwyn.vcxproj" Id="a41a3626-8826-4680-bfe5-f8850f0c082e" />
+</Solution>
