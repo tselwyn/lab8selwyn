@@ -40,10 +40,17 @@ int main() {
 
     int rw = al_get_bitmap_width(rocket);
     int rh = al_get_bitmap_height(rocket);
+    float cx = rw / 2.0f;
+    float cy = rh / 2.0f;
 
     float rocket_x = SCREEN_W / 2.0f;
     float rocket_y = SCREEN_H / 2.0f;
     float dx = 0, dy = 0;
+
+    // flip and rotation for facing direction
+    int flip_flag = 0;
+    float base_angle = 0;
+    int direction = 0; // 0=right 1=left 2=up 3=down
 
     bool done = false;
     ALLEGRO_EVENT ev;
@@ -62,15 +69,27 @@ int main() {
 
             if (ev.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
                 dx = SPEED; dy = 0;
+                direction = 0;
+                flip_flag = 0;
+                base_angle = 1.57f;
             }
             else if (ev.keyboard.keycode == ALLEGRO_KEY_LEFT) {
                 dx = -SPEED; dy = 0;
+                direction = 1;
+                flip_flag = ALLEGRO_FLIP_HORIZONTAL;
+                base_angle = -1.57f;
             }
             else if (ev.keyboard.keycode == ALLEGRO_KEY_UP) {
                 dx = 0; dy = -SPEED;
+                direction = 2;
+                flip_flag = 0;
+                base_angle = 0;
             }
             else if (ev.keyboard.keycode == ALLEGRO_KEY_DOWN) {
                 dx = 0; dy = SPEED;
+                direction = 3;
+                flip_flag = ALLEGRO_FLIP_VERTICAL;
+                base_angle = 0;
             }
             else if (ev.keyboard.keycode == ALLEGRO_KEY_SPACE) {
                 dx = 0; dy = 0;
@@ -87,7 +106,8 @@ int main() {
                 0, 0, al_get_bitmap_width(bg), al_get_bitmap_height(bg),
                 0, 0, SCREEN_W, SCREEN_H, 0);
 
-            al_draw_bitmap(rocket, rocket_x, rocket_y, 0);
+            al_draw_rotated_bitmap(rocket, cx, cy,
+                rocket_x + cx, rocket_y + cy, base_angle, flip_flag);
 
             al_flip_display();
         }
