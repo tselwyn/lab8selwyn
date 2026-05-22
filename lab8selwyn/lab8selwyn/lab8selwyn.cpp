@@ -48,9 +48,11 @@ int main() {
     float dx = 0, dy = 0;
 
     // flip and rotation for facing direction
-    int flip_flag = 0;
+    float angle = 0;
     float base_angle = 0;
+    int flip_flag = 0;
     int direction = 0; // 0=right 1=left 2=up 3=down
+    bool rotating = false;
 
     bool done = false;
     ALLEGRO_EVENT ev;
@@ -67,38 +69,103 @@ int main() {
             if (ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
                 done = true;
 
-            if (ev.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
-                dx = SPEED; dy = 0;
-                direction = 0;
-                flip_flag = 0;
-                base_angle = 1.57f;
-            }
-            else if (ev.keyboard.keycode == ALLEGRO_KEY_LEFT) {
-                dx = -SPEED; dy = 0;
-                direction = 1;
-                flip_flag = ALLEGRO_FLIP_HORIZONTAL;
-                base_angle = -1.57f;
-            }
-            else if (ev.keyboard.keycode == ALLEGRO_KEY_UP) {
-                dx = 0; dy = -SPEED;
-                direction = 2;
-                flip_flag = 0;
-                base_angle = 0;
-            }
-            else if (ev.keyboard.keycode == ALLEGRO_KEY_DOWN) {
-                dx = 0; dy = SPEED;
-                direction = 3;
-                flip_flag = ALLEGRO_FLIP_VERTICAL;
-                base_angle = 0;
-            }
-            else if (ev.keyboard.keycode == ALLEGRO_KEY_SPACE) {
-                dx = 0; dy = 0;
+            if (!rotating) {
+                if (ev.keyboard.keycode == ALLEGRO_KEY_RIGHT) {
+                    dx = SPEED; dy = 0;
+                    direction = 0;
+                    flip_flag = 0;
+                    base_angle = 1.57f;
+                    angle = 0;
+                }
+                else if (ev.keyboard.keycode == ALLEGRO_KEY_LEFT) {
+                    dx = -SPEED; dy = 0;
+                    direction = 1;
+                    flip_flag = ALLEGRO_FLIP_HORIZONTAL;
+                    base_angle = -1.57f;
+                    angle = 0;
+                }
+                else if (ev.keyboard.keycode == ALLEGRO_KEY_UP) {
+                    dx = 0; dy = -SPEED;
+                    direction = 2;
+                    flip_flag = 0;
+                    base_angle = 0;
+                    angle = 0;
+                }
+                else if (ev.keyboard.keycode == ALLEGRO_KEY_DOWN) {
+                    dx = 0; dy = SPEED;
+                    direction = 3;
+                    flip_flag = ALLEGRO_FLIP_VERTICAL;
+                    base_angle = 0;
+                    angle = 0;
+                }
+                else if (ev.keyboard.keycode == ALLEGRO_KEY_SPACE) {
+                    dx = 0; dy = 0;
+                }
             }
         }
 
         if (ev.type == ALLEGRO_EVENT_TIMER) {
-            rocket_x += dx;
-            rocket_y += dy;
+            if (rotating) {
+                angle += 0.1f;
+                if (angle >= 3.14f) {
+                    angle = 0;
+                    rotating = false;
+
+                    if (direction == 0) {
+                        direction = 1;
+                        dx = -SPEED; dy = 0;
+                        flip_flag = ALLEGRO_FLIP_HORIZONTAL;
+                        base_angle = -1.57f;
+                    }
+                    else if (direction == 1) {
+                        direction = 0;
+                        dx = SPEED; dy = 0;
+                        flip_flag = 0;
+                        base_angle = 1.57f;
+                    }
+                    else if (direction == 2) {
+                        direction = 3;
+                        dx = 0; dy = SPEED;
+                        flip_flag = ALLEGRO_FLIP_VERTICAL;
+                        base_angle = 0;
+                    }
+                    else if (direction == 3) {
+                        direction = 2;
+                        dx = 0; dy = -SPEED;
+                        flip_flag = 0;
+                        base_angle = 0;
+                    }
+                }
+            }
+            else {
+                rocket_x += dx;
+                rocket_y += dy;
+
+                if (rocket_x <= 0) {
+                    rocket_x = 0;
+                    rotating = true;
+                    angle = 0;
+                    dx = 0; dy = 0;
+                }
+                if (rocket_x >= SCREEN_W - rw) {
+                    rocket_x = (float)(SCREEN_W - rw);
+                    rotating = true;
+                    angle = 0;
+                    dx = 0; dy = 0;
+                }
+                if (rocket_y <= 0) {
+                    rocket_y = 0;
+                    rotating = true;
+                    angle = 0;
+                    dx = 0; dy = 0;
+                }
+                if (rocket_y >= SCREEN_H - rh) {
+                    rocket_y = (float)(SCREEN_H - rh);
+                    rotating = true;
+                    angle = 0;
+                    dx = 0; dy = 0;
+                }
+            }
         }
 
         if (al_is_event_queue_empty(event_queue)) {
@@ -107,7 +174,7 @@ int main() {
                 0, 0, SCREEN_W, SCREEN_H, 0);
 
             al_draw_rotated_bitmap(rocket, cx, cy,
-                rocket_x + cx, rocket_y + cy, base_angle, flip_flag);
+                rocket_x + cx, rocket_y + cy, base_angle + angle, flip_flag);
 
             al_flip_display();
         }
